@@ -58,10 +58,13 @@ public class AuthorizeController {
             User user = new User();
             String token = UUID.randomUUID().toString();
             user.setToken(token);
+            //获取用户名称
             user.setName(githubUser.getName());
             user.setAccountId(String.valueOf(githubUser.getId()));
             user.setGmtCreate(System.currentTimeMillis());
             user.setGmtModified(user.getGmtCreate());
+            //获取用户头像
+            user.setAvatarUrl(githubUser.getAvatarUrl());
             //将用户信息存入数据库
             userMapper.insert(user);
             response.addCookie(new Cookie("token",token));

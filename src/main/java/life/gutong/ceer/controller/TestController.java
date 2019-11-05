@@ -27,15 +27,17 @@ public class TestController {
     public String getHello(HttpServletRequest request){
         //获取存贮的cookie
         Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
+        if (cookies!=null && cookies.length !=0) {
+            for (Cookie cookie : cookies) {
                 //获取token的value值 用来查找用户
-            if ("token".equals(cookie.getName())){
-                String token = cookie.getValue();
-                User user = userMapper.findUserByToken(token);
-                if (user!=null){
-                    request.getSession().setAttribute("user",user);
+                if ("token".equals(cookie.getName())) {
+                    String token = cookie.getValue();
+                    User user = userMapper.findUserByToken(token);
+                    if (user != null) {
+                        request.getSession().setAttribute("user", user);
+                    }
+                    break;
                 }
-                break;
             }
         }
         return "index";

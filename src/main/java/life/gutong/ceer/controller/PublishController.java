@@ -63,15 +63,17 @@ public class PublishController {
         User user = null;
         //获取存贮的cookie
         Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
+        if (cookies!=null && cookies.length !=0){
+            for (Cookie cookie : cookies) {
             //获取token的value值 用来查找用户
-            if ("token".equals(cookie.getName())){
-                String token = cookie.getValue();
-                 user = userMapper.findUserByToken(token);
-                if (user!=null){
-                    request.getSession().setAttribute("user",user);
+                if ("token".equals(cookie.getName())){
+                    String token = cookie.getValue();
+                    user = userMapper.findUserByToken(token);
+                    if (user!=null){
+                         request.getSession().setAttribute("user",user);
+                    }
+                    break;
                 }
-                break;
             }
         }
         //如果用户为登录  向前端页面返回错误信息
