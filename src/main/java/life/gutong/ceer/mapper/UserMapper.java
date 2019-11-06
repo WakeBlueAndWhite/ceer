@@ -36,4 +36,13 @@ public interface UserMapper {
      * @Date: 2019/11/4
      */
     User findUserByToken(@Param("token") String token);
+
+    @Select("select * from user where id = #{id}")
+    /**
+     * @Description: 通过id查找用户
+     * @return: void
+     * @Author: ceer
+     * @Date: 2019/11/6
+     */
+    User findUserById(@Param("id") Integer id);
 }

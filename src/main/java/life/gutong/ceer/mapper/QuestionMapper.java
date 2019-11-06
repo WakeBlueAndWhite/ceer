@@ -3,6 +3,9 @@ package life.gutong.ceer.mapper;
 import life.gutong.ceer.model.Question;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 /**
  * @ProjectName: ceer
@@ -19,4 +22,7 @@ public interface QuestionMapper {
             "tag) values (#{title},#{description}," +
             "#{gmtCreate},#{gmtModified},#{creator},#{tag})")
     void create(Question question);
+
+    @Select("select * from question")
+    List<Question> selectAll();
 }
