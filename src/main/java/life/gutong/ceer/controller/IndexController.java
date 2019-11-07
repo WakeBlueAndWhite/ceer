@@ -1,13 +1,14 @@
 package life.gutong.ceer.controller;
 
+import life.gutong.ceer.dto.PaginationDTO;
 import life.gutong.ceer.dto.QuestionDTO;
-import life.gutong.ceer.mapper.QuestionMapper;
 import life.gutong.ceer.mapper.UserMapper;
 import life.gutong.ceer.model.User;
 import life.gutong.ceer.service.QuestionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
@@ -32,7 +33,11 @@ public class IndexController {
     private QuestionService questionService;
 
     @GetMapping("/")
-    public String index(HttpServletRequest request, Model model){
+    public String index(HttpServletRequest request, Model model,
+    //page为当前页数 默认为第一页
+     //size为分页每页显示的数量 默认为5页
+    @RequestParam(name = "page",defaultValue = "1") Integer page,
+    @RequestParam(name = "size",defaultValue = "2") Integer size){
         //获取存贮的cookie
         Cookie[] cookies = request.getCookies();
         if (cookies!=null && cookies.length !=0) {
@@ -49,11 +54,8 @@ public class IndexController {
             }
         }
         //查出所有的QuestionDTOList 并存入model中用于回显与前端页面
-        List<QuestionDTO> questionDTOList = questionService.list();
-        for (QuestionDTO questionDTO:questionDTOList) {
-            questionDTO.setDescription("ceer");
-        }
-        model.addAttribute("questions",questionDTOList);
+        PaginationDTO paginationDTOList = questionService.list(page,size);
+        model.addAttribute("paginationDTOList",paginationDTOList);
         return "index";
     }
 }

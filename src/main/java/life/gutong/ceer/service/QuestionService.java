@@ -1,5 +1,6 @@
 package life.gutong.ceer.service;
 
+import life.gutong.ceer.dto.PaginationDTO;
 import life.gutong.ceer.dto.QuestionDTO;
 import life.gutong.ceer.mapper.QuestionMapper;
 import life.gutong.ceer.mapper.UserMapper;
@@ -28,9 +29,26 @@ public class QuestionService {
     @Resource
     private UserMapper userMapper;
 
-    public List<QuestionDTO> list(){
-        //从数据库中查出所有的questionList
-        List<Question> questionList = questionMapper.selectAll();
+    public PaginationDTO list(Integer page,Integer size){
+        PaginationDTO paginationDTO = new PaginationDTO();
+        Integer totalCount = questionMapper.listCount();
+        paginationDTO.setPagination(totalCount,page,size);
+        //校验分页查询语句  如果page当前页小于1 page=1 如果大于分页总页数 page=总页数
+        if (page < 1){
+            page = 1;
+        }
+        if (page > paginationDTO.getTotalPage()){
+            page = paginationDTO.getTotalPage();
+        }
+        /**page size*(page-1)
+         * 1    5
+         * 2    10
+         * 3    15
+         */
+        //每页显示的数据数量
+        Integer offset = size * (page-1);
+        //从数据库中分页查询questionList
+        List<Question> questionList = questionMapper.showPage(offset,size);
         //声明questionDTOList
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         for (Question  question: questionList) {
@@ -44,6 +62,7 @@ public class QuestionService {
             //将questionDTO对象放入集合中
             questionDTOList.add(questionDTO);
         }
-        return questionDTOList;
+        paginationDTO.setQuestions(questionDTOList);
+        return paginationDTO;
     }
 }
