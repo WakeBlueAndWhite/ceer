@@ -59,4 +59,25 @@ public interface QuestionMapper {
      * @Date: 2019/11/6
      */ 
     Integer listCount();
+    
+    @Select("select * from question where creator = #{userId} limit #{offset},#{size}")
+    /**
+     * @Description:  通过用户id查出对应用户的问题列表进行分页
+     * @return: java.util.List<life.gutong.ceer.model.Question>
+     * @Author: ceer
+     * @Date: 2019/11/7
+     */ 
+    List<Question> selectByUserId(@Param(value = "userId")Integer userId,
+                                   @Param(value = "offset") Integer offset,
+                                   @Param(value = "size")Integer size);
+
+
+    @Select("select count(1) from question where creator = #{userId}")
+    /**
+     * @Description:   根据用户Id查出对应的存储问题的总数
+     * @return: java.lang.Integer
+     * @Author: ceer
+     * @Date: 2019/11/7
+     */ 
+    Integer selectQuestionCountByUserId(@Param(value = "userId") Integer userId);
 }

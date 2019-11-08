@@ -23,20 +23,9 @@ public class PaginationDTO {
     private Integer page;
     private List<Integer> pages = new ArrayList<>();
     private Integer totalPage;
-    public void setPagination(Integer totalCount, Integer page, Integer size) {
-        //分页的总页数 如果数据库总数量%每页显示的数量等于0
-        // 表示可以整除 即当前分页数量为前者除以后者 否则+1
-        if (totalCount % size == 0){
-            totalPage = totalCount/size;
-        }else{
-            totalPage = totalCount/size + 1;
-        }
-        if (page < 1){
-            page = 1;
-        }
-        if (page > totalPage){
-            page = totalPage;
-        }
+
+    public void setPagination(Integer totalPage, Integer page) {
+        this.totalPage = totalPage;
         this.page = page;
         pages.add(page);
         for (int i = 1; i <=3 ; i++) {
