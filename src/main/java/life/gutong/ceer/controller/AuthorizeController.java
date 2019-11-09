@@ -5,6 +5,7 @@ import life.gutong.ceer.dto.GithubUser;
 import life.gutong.ceer.mapper.UserMapper;
 import life.gutong.ceer.model.User;
 import life.gutong.ceer.provider.GithubProvider;
+import life.gutong.ceer.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.UUID;
 
 /**
@@ -38,9 +40,11 @@ public class AuthorizeController {
     @Value("${github.redirect_uri}")
     private String redirectUri;
 
-    @Resource
-    private UserMapper userMapper;
+    @Autowired
+    private UserService userService;
 
+    @Autowired
+    private UserMapper userMapper;
     @GetMapping("callback")
     public String callback(@RequestParam(name = "code")String code,
                            @RequestParam(name = "state")String state,
@@ -61,18 +65,29 @@ public class AuthorizeController {
             //获取用户名称
             user.setName(githubUser.getName());
             user.setAccountId(String.valueOf(githubUser.getId()));
-            user.setGmtCreate(System.currentTimeMillis());
-            user.setGmtModified(user.getGmtCreate());
             //获取用户头像
             user.setAvatarUrl(githubUser.getAvatarUrl());
-            //将用户信息存入数据库
-            userMapper.insert(user);
+            //如果用户第一次登录则将数据存入数据库
+            //如果不是第一次登录则更新用户数据状态
+            userService.createOrUpdate(user);
             response.addCookie(new Cookie("token",token));
             return "redirect:/";
         }else {
             return "redirect:/";
         }
-//        System.out.println(user.getName());
-//        return "index";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request,HttpServletResponse response){
+        //清除session
+        HttpSession session = request.getSession();
+        session.invalidate();
+        //清除session
+        Cookie cookie = new Cookie("token",null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+        //重定向到index
+        return "redirect:/";
     }
 }

@@ -120,4 +120,28 @@ public class QuestionService {
         paginationDTO.setQuestions(questionDTOList);
         return paginationDTO;
     }
+
+    public QuestionDTO selectQuestionById(Integer id) {
+
+        Question question = questionMapper.selectById(id);
+        QuestionDTO questionDTO = new QuestionDTO();
+        //将question对象复制给questionDTO
+        BeanUtils.copyProperties(question,questionDTO);
+        User user = userMapper.findUserById(question.getCreator());
+        questionDTO.setUser(user);
+        return questionDTO;
+    }
+
+    public void createOrUpdateQuestion(Question question) {
+        //如果获取到的id为空 则表示是新插入的问题 将问题存入数据库
+        if (question.getId() == null){
+            question.setGmtCreate(System.currentTimeMillis());
+            question.setGmtModified(question.getGmtCreate());
+            questionMapper.create(question);
+        }else{
+            //如果不是 则表示是编辑更新后的问题 更新时间 并将更新过的内容插入数据库
+            question.setGmtModified(System.currentTimeMillis());
+            questionMapper.updateQuestionById(question);
+        }
+    }
 }

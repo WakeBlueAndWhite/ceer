@@ -1,10 +1,7 @@
 package life.gutong.ceer.mapper;
 
 import life.gutong.ceer.model.Question;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -80,4 +77,24 @@ public interface QuestionMapper {
      * @Date: 2019/11/7
      */ 
     Integer selectQuestionCountByUserId(@Param(value = "userId") Integer userId);
+
+
+    @Select("select * from question where id = #{id}")
+    /**
+     * @Description:   通过id查出问题
+     * @return: life.gutong.ceer.model.Question
+     * @Author: ceer
+     * @Date: 2019/11/8
+     */
+    Question selectById(@Param(value = "id") Integer id);
+
+
+    @Update("update question set title = #{title},description = #{description},gmt_modified = #{gmtModified},tag = #{tag} where id = #{id}")
+    /**
+     * @Description:   根据id更改question
+     * @return: void
+     * @Author: ceer
+     * @Date: 2019/11/9
+     */ 
+    void updateQuestionById(Question question);
 }

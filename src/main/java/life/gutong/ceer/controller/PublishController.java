@@ -1,12 +1,16 @@
 package life.gutong.ceer.controller;
 
+import life.gutong.ceer.dto.QuestionDTO;
 import life.gutong.ceer.mapper.QuestionMapper;
 import life.gutong.ceer.mapper.UserMapper;
 import life.gutong.ceer.model.Question;
 import life.gutong.ceer.model.User;
+import life.gutong.ceer.service.QuestionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -25,11 +29,21 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class PublishController {
 
-    @Resource
-    private UserMapper userMapper;
+    @Autowired
+    private QuestionService questionService;
 
-    @Resource
-    private QuestionMapper questionMapper;
+
+    @GetMapping("/publish/{id}")
+    public String poPublish(@PathVariable(name = "id")Integer id,Model model){
+        //通过id查出对应的question 并将对应的内容回显于前端页面
+        QuestionDTO question = questionService.selectQuestionById(id);
+        model.addAttribute("title",question.getTitle());
+        model.addAttribute("description",question.getDescription());
+        model.addAttribute("tag",question.getTag());
+        //将id回显于前端的隐藏域中  随着表单的提交而获取id的值
+        model.addAttribute("id",question.getId());
+        return "publish";
+    }
 
     @GetMapping("/publish")
     public String publish(){
@@ -38,9 +52,10 @@ public class PublishController {
 
     @PostMapping("/publish")
     public String doPublish(
-            @RequestParam("title")String title,
-            @RequestParam("description")String description,
-            @RequestParam("tag")String tag,
+            @RequestParam(value = "title",required = false)String title,
+            @RequestParam(value = "description",required = false)String description,
+            @RequestParam(value = "tag",required = false)String tag,
+            @RequestParam(value = "id",required = false)Integer id,
             HttpServletRequest request,
             Model model){
         //将用户填写的字段回显在页面
@@ -60,22 +75,8 @@ public class PublishController {
             model.addAttribute("error","标签不能为空");
             return "publish";
         }
-        User user = null;
-        //获取存贮的cookie
-        Cookie[] cookies = request.getCookies();
-        if (cookies!=null && cookies.length !=0){
-            for (Cookie cookie : cookies) {
-            //获取token的value值 用来查找用户
-                if ("token".equals(cookie.getName())){
-                    String token = cookie.getValue();
-                    user = userMapper.findUserByToken(token);
-                    if (user!=null){
-                         request.getSession().setAttribute("user",user);
-                    }
-                    break;
-                }
-            }
-        }
+        //从session中获取user
+        User user = (User) request.getSession().getAttribute("user");
         //如果用户为登录  向前端页面返回错误信息
         if (user == null){
             model.addAttribute("error","用户未登录");
@@ -89,8 +90,10 @@ public class PublishController {
         question.setCreator(user.getId());
         question.setGmtCreate(System.currentTimeMillis());
         question.setGmtModified(question.getGmtCreate());
-        //往数据库里存入用户发出的问题
-        questionMapper.create(question);
+        question.setId(id);
+        //如果是更改问题 则获取用户id以及更改内容
+        // 如果是新问题 则往数据库里存入用户发出的问题
+        questionService.createOrUpdateQuestion(question);
         return "redirect:/";
     }
 }

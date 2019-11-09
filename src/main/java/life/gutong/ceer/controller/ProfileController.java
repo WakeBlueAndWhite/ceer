@@ -35,23 +35,10 @@ public class ProfileController {
     public String profile(HttpServletRequest request,
                           @PathVariable(name = "action")String action, Model model,
                           @RequestParam(name = "page",defaultValue = "1") Integer page,
-                          @RequestParam(name = "size",defaultValue = "2") Integer size){
-        User user = null;
-        //获取存贮的cookie
-        Cookie[] cookies = request.getCookies();
-        if (cookies!=null && cookies.length !=0) {
-            for (Cookie cookie : cookies) {
-                //获取token的value值 用来查找用户
-                if ("token".equals(cookie.getName())) {
-                    String token = cookie.getValue();
-                     user = userMapper.findUserByToken(token);
-                    if (user != null) {
-                        request.getSession().setAttribute("user", user);
-                    }
-                    break;
-                }
-            }
-        }
+                          @RequestParam(name = "size",defaultValue = "3") Integer size){
+
+        //从session中获取user
+        User user = (User) request.getSession().getAttribute("user");
         if (user == null){
             return "redirect:/";
         }
