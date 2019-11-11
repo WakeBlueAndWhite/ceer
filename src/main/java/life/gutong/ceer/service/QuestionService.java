@@ -2,6 +2,9 @@ package life.gutong.ceer.service;
 
 import life.gutong.ceer.dto.PaginationDTO;
 import life.gutong.ceer.dto.QuestionDTO;
+import life.gutong.ceer.exception.CustomizeException;
+import life.gutong.ceer.exception.CustomizeStatusMessage;
+import life.gutong.ceer.mapper.QuestionExtMapper;
 import life.gutong.ceer.mapper.QuestionMapper;
 import life.gutong.ceer.mapper.UserMapper;
 import life.gutong.ceer.model.Question;
@@ -9,6 +12,7 @@ import life.gutong.ceer.model.QuestionExample;
 import life.gutong.ceer.model.User;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -30,7 +34,8 @@ public class QuestionService {
     private QuestionMapper questionMapper;
     @Resource
     private UserMapper userMapper;
-
+    @Autowired
+    private QuestionExtMapper questionExtMapper;
     public PaginationDTO list(Integer page,Integer size){
         PaginationDTO paginationDTO = new PaginationDTO();
         Integer totalPage;
@@ -58,11 +63,11 @@ public class QuestionService {
         //每页显示的数据数量
         Integer offset = size * (page-1);
         //从数据库中分页查询questionList
-        List<Question> questionList = questionMapper.selectByExampleWithRowbounds(
-                            new QuestionExample(),new RowBounds(offset,size));
+        List<Question> questionList = questionMapper.selectByExampleWithRowbounds(new QuestionExample(),new RowBounds(offset,size));
         //声明questionDTOList
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         for (Question  question: questionList) {
+            System.out.println("desc1"+question.getDescription());
             //通过循环查出用户   Question中的creator是User中的id
             User user = userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
@@ -116,6 +121,7 @@ public class QuestionService {
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         for (Question  question: questionList) {
             //通过循环查出用户   Question中的creator是User中的id
+            System.out.println("desc"+question.getDescription());
             User user = userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
             //将question对象复制给questionDTO
@@ -132,6 +138,11 @@ public class QuestionService {
     public QuestionDTO selectQuestionById(Integer id) {
 
         Question question = questionMapper.selectByPrimaryKey(id);
+        System.out.println("desc111"+question.getDescription());
+        //如果question为空 则抛出自定义异常
+        if (question == null){
+            throw new CustomizeException(CustomizeStatusMessage.QUESTION_NOT_FOUNT);
+        }
         QuestionDTO questionDTO = new QuestionDTO();
         //将question对象复制给questionDTO
         BeanUtils.copyProperties(question,questionDTO);
@@ -160,7 +171,18 @@ public class QuestionService {
              * 第一个参数 是要修改的部分值组成的对象，其中有些属性为null则表示该项不修改。
              * 第二个参数 是一个对应的查询条件的类， 通过这个类可以实现 order by 和一部分的where 条件。
              */
-            questionMapper.updateByExampleSelective(updateQuestion,questionExample);
+            int i = questionMapper.updateByExampleSelective(updateQuestion, questionExample);
+            //如果没有更改成功 则抛出自定义异常
+            if (i != 1){
+                throw new CustomizeException(CustomizeStatusMessage.QUESTION_NOT_FOUNT);
+            }
         }
+    }
+
+    public void addViewCount(Integer id) {
+        Question question = new Question();
+        question.setId(id);
+        question.setViewCount(1);
+        questionExtMapper.addViewCount(question);
     }
 }

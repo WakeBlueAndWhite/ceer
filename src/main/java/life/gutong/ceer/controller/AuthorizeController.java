@@ -82,7 +82,7 @@ public class AuthorizeController {
         //清除session
         HttpSession session = request.getSession();
         session.invalidate();
-        //清除session
+        //清除cookie
         Cookie cookie = new Cookie("token",null);
         cookie.setMaxAge(0);
         cookie.setPath("/");

@@ -25,8 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class ProfileController {
 
-    @Resource
-    private UserMapper userMapper;
+
 
     @Resource
     private QuestionService questionService;
