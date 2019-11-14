@@ -16,15 +16,71 @@ body {
     width: 50px;
     height: 50px;
 }
+.media-body{
+    padding-top: 10px;
+}
 .text-desc{
     font-size: 12px;
     font-weight: normal;
     color: #999;
 }
 .ceer-question{
+    display: block;
     color: #999;
     font-size: 14px;
+    margin-bottom: 15px;
+}
+.question-title{
+    margin-top: 25px;
+}
+.question-tag{
+    margin-right: 5px;
 }
 .jumbotron{
     margin: 50px;
+}
+.comment-btn{
+    float: right;
+    margin-bottom: 10px;
+}
+.comment{
+    margin: 10px 0;
+}
+.comments{
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+.menu{
+    color: #999;
+}
+.menu .icon{
+    margin-right: 8px;
+    margin-top: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+.menu .active{
+    color: #499ef3;
+}
+.menu .icon:hover{
+    color: #499ef3;
+}
+.menu .comment-icon {
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.menu .comment-icon :hover {
+    color: #499ef3;
+}
+.sub-comments{
+    margin-bottom: 15px;
+    border: 1px solid #eee;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-radius: 5px;
+}
+.sub-comments .btn{
+    margin: 10px 0;
 }

@@ -34,7 +34,7 @@ public class PublishController {
 
 
     @GetMapping("/publish/{id}")
-    public String poPublish(@PathVariable(name = "id")Integer id,Model model){
+    public String poPublish(@PathVariable(name = "id")Long id,Model model){
         //通过id查出对应的question 并将对应的内容回显于前端页面
         QuestionDTO question = questionService.selectQuestionById(id);
         model.addAttribute("title",question.getTitle());
@@ -55,7 +55,7 @@ public class PublishController {
             @RequestParam(value = "title",required = false)String title,
             @RequestParam(value = "description",required = false)String description,
             @RequestParam(value = "tag",required = false)String tag,
-            @RequestParam(value = "id",required = false)Integer id,
+            @RequestParam(value = "id",required = false)Long id,
             HttpServletRequest request,
             Model model){
         //将用户填写的字段回显在页面

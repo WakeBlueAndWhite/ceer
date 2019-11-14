@@ -21,7 +21,12 @@ public class UserService {
 
     @Autowired
     private UserMapper userMapper;
-
+    /**
+     * @Description:   根据从数据库中获取到id的状态来判断创建用户或者更新用户的数据
+     * @return: 
+     * @Author: ceer
+     * @Date: 2019/11/12
+     */ 
     public void createOrUpdate(User user){
         //根据唯一的账号id(AccountId)获取用户
         UserExample userExample = new UserExample();

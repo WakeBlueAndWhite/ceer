@@ -1,12 +1,17 @@
 package life.gutong.ceer.controller;
 
+import life.gutong.ceer.dto.CommentDTO;
 import life.gutong.ceer.dto.QuestionDTO;
+import life.gutong.ceer.enums.CommentTypeEnum;
+import life.gutong.ceer.service.CommentService;
 import life.gutong.ceer.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+
+import java.util.List;
 
 /**
  * @ProjectName: ceer
@@ -22,12 +27,17 @@ public class QuestionController {
     @Autowired
     private QuestionService questionService;
 
+    @Autowired
+    private CommentService commentService;
     @GetMapping("/question/{id}")
-    public String question(@PathVariable(name = "id")Integer id, Model model){
+    public String question(@PathVariable(name = "id")Long id, Model model){
 
         QuestionDTO questionDTO = questionService.selectQuestionById(id);
+        List<CommentDTO> commentDTO = commentService.selectQuestionDTOByTargetId(id,CommentTypeEnum.QUESTION);
+        //累计增加阅读数
         questionService.addViewCount(id);
         model.addAttribute("question",questionDTO);
+        model.addAttribute("commentDTO",commentDTO);
         return "question";
     }
 }

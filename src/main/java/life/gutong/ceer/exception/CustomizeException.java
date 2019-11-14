@@ -11,15 +11,13 @@ package life.gutong.ceer.exception;
 public class CustomizeException extends RuntimeException{
 
     private String message;
+    private Integer code;
     private CustomizeStatusMessage customizeStatusMessage;
-
-    public CustomizeException(String message) {
-        this.message = message;
-    }
 
     public CustomizeException(CustomizeStatusMessage customizeStatusMessage) {
         this.customizeStatusMessage = customizeStatusMessage;
         this.message = customizeStatusMessage.getMessage();
+        this.code = customizeStatusMessage.getCode();
     }
 
     public CustomizeStatusMessage getCustomizeStatusMessage() {
@@ -37,5 +35,13 @@ public class CustomizeException extends RuntimeException{
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public void setCode(Integer code) {
+        this.code = code;
     }
 }

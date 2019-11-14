@@ -36,6 +36,12 @@ public class QuestionService {
     private UserMapper userMapper;
     @Autowired
     private QuestionExtMapper questionExtMapper;
+    /**
+     * @Description:   首页问题分页显示
+     * @return: 
+     * @Author: ceer
+     * @Date: 2019/11/12
+     */ 
     public PaginationDTO list(Integer page,Integer size){
         PaginationDTO paginationDTO = new PaginationDTO();
         Integer totalPage;
@@ -63,11 +69,12 @@ public class QuestionService {
         //每页显示的数据数量
         Integer offset = size * (page-1);
         //从数据库中分页查询questionList
-        List<Question> questionList = questionMapper.selectByExampleWithRowbounds(new QuestionExample(),new RowBounds(offset,size));
+        QuestionExample questionExample = new QuestionExample();
+        questionExample.setOrderByClause("gmt_create desc");
+        List<Question> questionList = questionMapper.selectByExampleWithRowbounds(questionExample,new RowBounds(offset,size));
         //声明questionDTOList
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         for (Question  question: questionList) {
-            System.out.println("desc1"+question.getDescription());
             //通过循环查出用户   Question中的creator是User中的id
             User user = userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
@@ -81,8 +88,13 @@ public class QuestionService {
         paginationDTO.setQuestions(questionDTOList);
         return paginationDTO;
     }
-
-    public PaginationDTO showQuestionById(Integer userId, Integer page, Integer size) {
+    /**
+     * @Description:   通过用户id 查出用户的问题 并分页显示于用户问题列表中
+     * @return: 
+     * @Author: ceer
+     * @Date: 2019/11/12
+     */ 
+    public PaginationDTO showQuestionById(Long userId, Integer page, Integer size) {
         PaginationDTO paginationDTO = new PaginationDTO();
         //根据用户id查出对应的问题列表的数量
         Integer totalPage;
@@ -121,7 +133,6 @@ public class QuestionService {
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         for (Question  question: questionList) {
             //通过循环查出用户   Question中的creator是User中的id
-            System.out.println("desc"+question.getDescription());
             User user = userMapper.selectByPrimaryKey(question.getCreator());
             QuestionDTO questionDTO = new QuestionDTO();
             //将question对象复制给questionDTO
@@ -135,10 +146,9 @@ public class QuestionService {
         return paginationDTO;
     }
 
-    public QuestionDTO selectQuestionById(Integer id) {
+    public QuestionDTO selectQuestionById(Long id) {
 
         Question question = questionMapper.selectByPrimaryKey(id);
-        System.out.println("desc111"+question.getDescription());
         //如果question为空 则抛出自定义异常
         if (question == null){
             throw new CustomizeException(CustomizeStatusMessage.QUESTION_NOT_FOUNT);
@@ -150,12 +160,20 @@ public class QuestionService {
         questionDTO.setUser(user);
         return questionDTO;
     }
-
+    /**
+     * @Description:  根据从数据库中是否获取到id来判断创建question或者更新question
+     * @return: 
+     * @Author: ceer
+     * @Date: 2019/11/12
+     */ 
     public void createOrUpdateQuestion(Question question) {
         //如果获取到的id为空 则表示是新插入的问题 将问题存入数据库
         if (question.getId() == null){
             question.setGmtCreate(System.currentTimeMillis());
             question.setGmtModified(question.getGmtCreate());
+            question.setViewCount(0);
+            question.setLikeCount(0);
+            question.setCommentCount(0);
             questionMapper.insert(question);
         }else{
             //如果不是 则表示是编辑更新后的问题 更新时间 并将更新过的内容插入数据库
@@ -178,8 +196,14 @@ public class QuestionService {
             }
         }
     }
-
-    public void addViewCount(Integer id) {
+    
+    /**
+     * @Description:  增加点赞数 每浏览一次加1
+     * @return: 
+     * @Author: ceer
+     * @Date: 2019/11/12
+     */ 
+    public void addViewCount(Long id) {
         Question question = new Question();
         question.setId(id);
         question.setViewCount(1);
