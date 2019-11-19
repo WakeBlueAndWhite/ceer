@@ -10,6 +10,7 @@ import life.gutong.ceer.mapper.UserMapper;
 import life.gutong.ceer.model.Question;
 import life.gutong.ceer.model.QuestionExample;
 import life.gutong.ceer.model.User;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @ProjectName: ceer
@@ -85,7 +87,7 @@ public class QuestionService {
             //将questionDTO对象放入集合中
             questionDTOList.add(questionDTO);
         }
-        paginationDTO.setQuestions(questionDTOList);
+        paginationDTO.setData(questionDTOList);
         return paginationDTO;
     }
     /**
@@ -142,7 +144,7 @@ public class QuestionService {
             //将questionDTO对象放入集合中
             questionDTOList.add(questionDTO);
         }
-        paginationDTO.setQuestions(questionDTOList);
+        paginationDTO.setData(questionDTOList);
         return paginationDTO;
     }
 
@@ -171,6 +173,7 @@ public class QuestionService {
         if (question.getId() == null){
             question.setGmtCreate(System.currentTimeMillis());
             question.setGmtModified(question.getGmtCreate());
+            //第一次存问题时 将参数设置为0
             question.setViewCount(0);
             question.setLikeCount(0);
             question.setCommentCount(0);
@@ -208,5 +211,28 @@ public class QuestionService {
         question.setId(id);
         question.setViewCount(1);
         questionExtMapper.addViewCount(question);
+    }
+
+    public List<QuestionDTO> selectRelated(QuestionDTO queryDTO) {
+        if (StringUtils.isBlank(queryDTO.getTag())){
+            return new ArrayList<>();
+        }
+        //将标签中的 , 换成 | 用于sql的正则表达式
+        //例java,spring,springboot -> java|spring|springboot
+        String tags = StringUtils.replace(queryDTO.getTag(), ",", "|");
+        Question question = new Question();
+        question.setTag(tags);
+        question.setId(queryDTO.getId());
+
+        //模糊查询出所有标签相关的question
+        List<Question> questions = questionExtMapper.selectRelated(question);
+
+        List<QuestionDTO> questionDTOS = questions.stream().map(q -> {
+            QuestionDTO questionDTO = new QuestionDTO();
+            BeanUtils.copyProperties(q, questionDTO);
+            return questionDTO;
+        }).collect(Collectors.toList());
+
+        return questionDTOS;
     }
 }

@@ -3,7 +3,9 @@ package life.gutong.ceer.controller;
 import life.gutong.ceer.dto.PaginationDTO;
 import life.gutong.ceer.mapper.UserMapper;
 import life.gutong.ceer.model.User;
+import life.gutong.ceer.service.NotificationService;
 import life.gutong.ceer.service.QuestionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class ProfileController {
 
-
+    @Autowired
+    private NotificationService notificationService;
 
     @Resource
     private QuestionService questionService;
@@ -44,13 +47,17 @@ public class ProfileController {
         if ("questions".equals(action)){
             model.addAttribute("section","questions");
             model.addAttribute("sectionName","我的提问");
+            PaginationDTO paginationDTOList = questionService.showQuestionById(user.getId(), page, size);
+            model.addAttribute("paginationDTOList",paginationDTOList);
         }
         if ("replies".equals(action)){
             model.addAttribute("section","replies");
             model.addAttribute("sectionName","最新回复");
+            //通过用户id获取在问题中回复过的信息详情
+            PaginationDTO paginationDTOList = notificationService.list(user.getId(), page, size);
+            model.addAttribute("paginationDTOList",paginationDTOList);
+
         }
-        PaginationDTO paginationDTOList = questionService.showQuestionById(user.getId(), page, size);
-        model.addAttribute("paginationDTOList",paginationDTOList);
         return "profile";
     }
 }

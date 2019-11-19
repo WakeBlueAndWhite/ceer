@@ -53,7 +53,7 @@ public class CommentController {
         comment.setCommentator(user.getId());
         comment.setLikeCount(0L);
         comment.setCommentCount(0);
-        commentService.heart(comment);
+        commentService.heart(comment,user);
         return ResultDTO.okOf();
     }
 

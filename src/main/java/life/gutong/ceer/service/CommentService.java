@@ -2,6 +2,8 @@ package life.gutong.ceer.service;
 
 import life.gutong.ceer.dto.CommentDTO;
 import life.gutong.ceer.enums.CommentTypeEnum;
+import life.gutong.ceer.enums.NotificationStatusEnum;
+import life.gutong.ceer.enums.NotificationTypeEnum;
 import life.gutong.ceer.exception.CustomizeException;
 import life.gutong.ceer.exception.CustomizeStatusMessage;
 import life.gutong.ceer.mapper.*;
@@ -43,11 +45,13 @@ public class CommentService {
     @Autowired
     private CommentExtMapper commentExtMapper;
 
+    @Autowired
+    private NotificationMapper notificationMapper;
     //事务注解   在问题中 插入问题后要执行增加浏览次数
     // 如果在插入问题后出现出现异常 那么后面的代码就不会执行了
     // 加入注解后 整段代码要么都成功 要么都不成功
     @Transactional
-    public void heart(Comment comment){
+    public void heart(Comment comment, User commentor){
         //数据校验
         if (comment.getParentId() == null || comment.getParentId() == 0){
             throw new CustomizeException(CustomizeStatusMessage.TARGET_PARAM_NOT_FOUND);
@@ -64,12 +68,20 @@ public class CommentService {
             if (dbComment == null) {
                 throw new CustomizeException(CustomizeStatusMessage.COMMENT_NOT_FOUND);
             }
+            //回复问题
+            Question question = questionMapper.selectByPrimaryKey(dbComment.getParentId());
+            if (question == null){
+                throw  new CustomizeException(CustomizeStatusMessage.QUESTION_NOT_FOUNT);
+            }
+
             commentMapper.insert(comment);
             // 增加评论数
             Comment parentComment = new Comment();
             parentComment.setId(comment.getParentId());
             parentComment.setCommentCount(1);
             commentExtMapper.addCommentCount(parentComment);
+            //创建通知
+            createNotify(comment,dbComment.getCommentator(),commentor.getName(),question.getTitle(),NotificationTypeEnum.REPLY_COMMENT,question.getId());
         }else {
             //回复问题
             Question question = questionMapper.selectByPrimaryKey(comment.getParentId());
@@ -79,7 +91,30 @@ public class CommentService {
             commentMapper.insert(comment);
             question.setCommentCount(1);
             questionExtMapper.addCommentCount(question);
+            //创建通知
+            createNotify(comment,question.getCreator(),commentor.getName(),question.getTitle(),NotificationTypeEnum.REPLY_QUESTION,question.getId());
+
         }
+    }
+                                                //用户id       //评论人的用户名称    //评论的问题标题
+    private void createNotify(Comment comment, Long receiver,String notifierName, String outerTitle, NotificationTypeEnum notificationTypeEnum,Long outerId){
+        Notification notification = new Notification();
+        notification.setGmtCreate(System.currentTimeMillis());
+        //获取当前类型 回复的是问题还是评论
+        notification.setType(notificationTypeEnum.getType());
+        //回复：获取当前问题的id
+        notification.setOuterid(outerId);
+        //获取回复问题人的用户id
+        notification.setNotifier(comment.getCommentator());
+        //设置当前状态为未读状态
+        notification.setStatus(NotificationStatusEnum.UNREAD.getStatus());
+        //获取当前的问题的用户id
+        notification.setReceiver(receiver);
+        //获取当前的评论人的用户名称
+        notification.setNotifierName(notifierName);
+        //获取当前的评论的问题标题
+        notification.setOuterTitle(outerTitle);
+        notificationMapper.insert(notification);
     }
 
     public List<CommentDTO> selectQuestionDTOByTargetId(Long id,CommentTypeEnum commentTypeEnum) {

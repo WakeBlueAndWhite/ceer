@@ -1,11 +1,11 @@
 package life.gutong.ceer.controller;
 
+import life.gutong.ceer.cache.TagCache;
 import life.gutong.ceer.dto.QuestionDTO;
-import life.gutong.ceer.mapper.QuestionMapper;
-import life.gutong.ceer.mapper.UserMapper;
 import life.gutong.ceer.model.Question;
 import life.gutong.ceer.model.User;
 import life.gutong.ceer.service.QuestionService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.annotation.Resource;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -42,11 +40,13 @@ public class PublishController {
         model.addAttribute("tag",question.getTag());
         //将id回显于前端的隐藏域中  随着表单的提交而获取id的值
         model.addAttribute("id",question.getId());
+        model.addAttribute("tags", TagCache.getAllTags());
         return "publish";
     }
 
     @GetMapping("/publish")
-    public String publish(){
+    public String publish(Model model){
+        model.addAttribute("tags", TagCache.getAllTags());
         return "publish";
     }
 
@@ -62,6 +62,7 @@ public class PublishController {
         model.addAttribute("title",title);
         model.addAttribute("description",description);
         model.addAttribute("tag",tag);
+        model.addAttribute("tags", TagCache.getAllTags());
         //如果用户没有填写相对应得内容 则将对应得信息回显与页面
         if (title == null || "".equals(title)){
             model.addAttribute("error","标题不能为空");
@@ -73,6 +74,12 @@ public class PublishController {
         }
         if (tag == null || "".equals(tag)){
             model.addAttribute("error","标签不能为空");
+            return "publish";
+        }
+
+        String invalid = TagCache.filterInvalid(tag);
+        if (StringUtils.isNotBlank(invalid)) {
+            model.addAttribute("error", "输入非法标签:" + invalid);
             return "publish";
         }
         //从session中获取user

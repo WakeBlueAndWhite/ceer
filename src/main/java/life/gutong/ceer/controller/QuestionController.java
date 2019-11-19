@@ -33,11 +33,15 @@ public class QuestionController {
     public String question(@PathVariable(name = "id")Long id, Model model){
 
         QuestionDTO questionDTO = questionService.selectQuestionById(id);
+        //模糊查询出与问题标签相关的问题列表
+        List<QuestionDTO> relatedQuestions = questionService.selectRelated(questionDTO);
+        //查询出问题
         List<CommentDTO> commentDTO = commentService.selectQuestionDTOByTargetId(id,CommentTypeEnum.QUESTION);
         //累计增加阅读数
         questionService.addViewCount(id);
         model.addAttribute("question",questionDTO);
         model.addAttribute("commentDTO",commentDTO);
+        model.addAttribute("relatedQuestions",relatedQuestions);
         return "question";
     }
 }

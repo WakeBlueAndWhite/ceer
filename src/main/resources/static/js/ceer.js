@@ -118,3 +118,22 @@ function openComment(e) {
         }
     }
 }
+
+//点击标签将获取的值放入标签中 以","分割
+function selectTag(e) {
+    var value = e.getAttribute("data-tag");
+    var val = $("#tag").val();
+    //检索的字符串值没有出现，则结果 -1
+    if (val.indexOf(value) == -1) {
+        if (val) {
+            $("#tag").val(val + ',' + value);
+        } else {
+            $("#tag").val(value);
+        }
+    }
+}
+
+
+function showTags() {
+    $("#tags ").show();
+}
