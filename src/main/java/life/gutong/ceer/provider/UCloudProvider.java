@@ -9,6 +9,7 @@ import cn.ucloud.ufile.exception.UfileClientException;
 import cn.ucloud.ufile.exception.UfileServerException;
 import life.gutong.ceer.exception.CustomizeException;
 import life.gutong.ceer.exception.CustomizeStatusMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,7 @@ import java.util.UUID;
  * @CreateDate: 2019/11/18 21:40
  */
 @Component
+@Slf4j
 public class UCloudProvider {
 
     @Value("${ucloud.ufile.public-key}")
@@ -72,11 +74,15 @@ public class UCloudProvider {
                         .createUrl();
                 return url;
             } else {
+                //记录文件上传失败日志
+                log.error("upload error,{}", response);
                 throw new CustomizeException(CustomizeStatusMessage.FILE_UPLOAD_FAIL);
             }
         } catch (UfileClientException e) {
+            log.error("upload error,{}", fileName, e);
             throw new CustomizeException(CustomizeStatusMessage.FILE_UPLOAD_FAIL);
         } catch (UfileServerException e) {
+            log.error("upload error,{}", fileName, e);
             throw new CustomizeException(CustomizeStatusMessage.FILE_UPLOAD_FAIL);
         }
     }

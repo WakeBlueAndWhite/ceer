@@ -98,7 +98,12 @@ public class CommentService {
     }
                                                 //用户id       //评论人的用户名称    //评论的问题标题
     private void createNotify(Comment comment, Long receiver,String notifierName, String outerTitle, NotificationTypeEnum notificationTypeEnum,Long outerId){
+        //当自己回复自己的评论时 return 不创建新的回复通知
+        if (comment.getCommentator().equals(receiver)) {
+            return;
+        }
         Notification notification = new Notification();
+        //获取当前时间
         notification.setGmtCreate(System.currentTimeMillis());
         //获取当前类型 回复的是问题还是评论
         notification.setType(notificationTypeEnum.getType());

@@ -38,11 +38,13 @@ public class IndexController {
     //page为当前页数 默认为第一页
      //size为分页每页显示的数量 默认为5页
     @RequestParam(name = "page",defaultValue = "1") Integer page,
-    @RequestParam(name = "size",defaultValue = "3") Integer size){
+    @RequestParam(name = "size",defaultValue = "3") Integer size,
+    @RequestParam(name = "search",required = false)String search){
 
         //查出所有的QuestionDTOList 并存入model中用于回显与前端页面
-        PaginationDTO paginationDTOList = questionService.list(page,size);
+        PaginationDTO paginationDTOList = questionService.list(search,page,size);
         model.addAttribute("paginationDTOList",paginationDTOList);
+        model.addAttribute("search",search);
         return "index";
     }
 }

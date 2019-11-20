@@ -6,6 +6,7 @@ import life.gutong.ceer.mapper.UserMapper;
 import life.gutong.ceer.model.User;
 import life.gutong.ceer.provider.GithubProvider;
 import life.gutong.ceer.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -28,6 +29,7 @@ import java.util.UUID;
  * @CreateDate: 2019/11/3 19:57
  */
 @Controller
+@Slf4j
 public class AuthorizeController {
 
     @Autowired
@@ -73,6 +75,8 @@ public class AuthorizeController {
             response.addCookie(new Cookie("token",token));
             return "redirect:/";
         }else {
+            //记录登录github失败日志
+            log.error("callback get github error,{}",githubUser);
             return "redirect:/";
         }
     }

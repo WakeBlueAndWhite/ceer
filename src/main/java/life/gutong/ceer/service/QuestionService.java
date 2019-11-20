@@ -2,6 +2,7 @@ package life.gutong.ceer.service;
 
 import life.gutong.ceer.dto.PaginationDTO;
 import life.gutong.ceer.dto.QuestionDTO;
+import life.gutong.ceer.dto.QuestionQueryDTO;
 import life.gutong.ceer.exception.CustomizeException;
 import life.gutong.ceer.exception.CustomizeStatusMessage;
 import life.gutong.ceer.mapper.QuestionExtMapper;
@@ -44,10 +45,16 @@ public class QuestionService {
      * @Author: ceer
      * @Date: 2019/11/12
      */ 
-    public PaginationDTO list(Integer page,Integer size){
+    public PaginationDTO list(String search,Integer page,Integer size){
+        String searchs = null;
+        if (StringUtils.isNotBlank(search)){
+            searchs = StringUtils.replace(search, " ","|");
+        }
         PaginationDTO paginationDTO = new PaginationDTO();
         Integer totalPage;
-        Integer totalCount = (int)questionMapper.countByExample(new QuestionExample());
+        QuestionQueryDTO questionQueryDTO = new QuestionQueryDTO();
+        questionQueryDTO.setSearch(searchs);
+        Integer totalCount = questionExtMapper.selectCountBySearch(questionQueryDTO);
         //校验分页查询语句  如果page当前页小于1 page=1 如果大于分页总页数 page=总页数
         if (totalCount % size == 0){
             totalPage = totalCount/size;
@@ -70,10 +77,10 @@ public class QuestionService {
          */
         //每页显示的数据数量
         Integer offset = size * (page-1);
+        questionQueryDTO.setSize(size);
+        questionQueryDTO.setPage(offset);
         //从数据库中分页查询questionList
-        QuestionExample questionExample = new QuestionExample();
-        questionExample.setOrderByClause("gmt_create desc");
-        List<Question> questionList = questionMapper.selectByExampleWithRowbounds(questionExample,new RowBounds(offset,size));
+        List<Question> questionList = questionExtMapper.selectQuestionBySearch(questionQueryDTO);
         //声明questionDTOList
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         for (Question  question: questionList) {

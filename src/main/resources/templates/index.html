@@ -37,7 +37,8 @@
                     <h4 class="media-heading" >
                         <a th:href="@{'/question/'+${question.id}}" th:text="${question.title}"></a>
                     </h4>
-                    <span th:text="${question.description}"></span> <br>
+                    <br>
+<!--                    <span th:text="${question.description}"></span> -->
                     <span class="text-desc"><span th:text="${question.commentCount}"></span>个回复 • <span th:text="${question.viewCount}"></span>次浏览 • <span th:text="${#dates.format(question.gmtCreate,'yyyy-MM-dd HH:mm')}"></span></span>
                 </div>
             </div>
@@ -45,23 +46,23 @@
             <nav aria-label="Page navigation">
                 <ul class="pagination">
                     <li th:if="${paginationDTOList.showFirstPage}">
-                        <a href="/?page=1" aria-label="Previous">
+                        <a th:href="@{/(page=1,search=${search})}" aria-label="Previous">
                             <span aria-hidden="true">&lt;&lt;</span>
                         </a>
                     </li>
                     <li th:if="${paginationDTOList.showPrevious}">
-                        <a th:href="@{/(page=${paginationDTOList.page - 1})}" aria-label="Previous">
+                        <a th:href="@{/(page=${paginationDTOList.page - 1},search=${search})}" aria-label="Previous">
                             <span aria-hidden="true">&lt;</span>
                         </a>
                     </li>
                     <li th:each="page:${paginationDTOList.pages}" th:class="${paginationDTOList.page==page}?'active' :''"><a th:href="@{/(page=${page})}" th:text="${page}"></a></li>
                     <li th:if="${paginationDTOList.showNext}">
-                        <a th:href="@{/(page=${paginationDTOList.page + 1})}" aria-label="Next">
+                        <a th:href="@{/(page=${paginationDTOList.page + 1},search=${search})}" aria-label="Next">
                             <span aria-hidden="true">&gt;</span>
                         </a>
                     </li>
                     <li th:if="${paginationDTOList.showEndPage}">
-                        <a th:href="@{/(page=${paginationDTOList.totalPage})}" aria-label="Next">
+                        <a th:href="@{/(page=${paginationDTOList.totalPage},search=${search})}" aria-label="Next">
                             <span aria-hidden="true">&gt;&gt;</span>
                         </a>
                     </li>
@@ -75,5 +76,6 @@
         </div>
     </div>
 </div>
+<div th:insert="~{footer :: foot}"></div>
 </body>
 </html>
